@@ -61,7 +61,7 @@
           },
         ]
       },
-    }));
+    })).map(graphOptions);
     return result;
   });
 
