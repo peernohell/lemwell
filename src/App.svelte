@@ -1,57 +1,102 @@
 <script>
-	const message = 'Learn Svelte';
+  import ProfitwellDashboard from './ProfitwellDashboard.svelte';
+  import profitwell from './profitwell';
+  let error = '';
+
+  let config = JSON.parse(localStorage.getItem('lemwellConfig')) || [];
+
+  $: {
+    console.log(`Save config into local storage ${config.length}`);
+    localStorage.setItem('lemwellConfig', JSON.stringify(config));
+  }
+
+  async function submitNewApiKey (event) {
+    const name = event.target.name.value;
+    const key = event.target.key.value;
+
+    if (!name) return;
+    if (!key) return;
+
+    if (!(await profitwell.test(key))) { error = 'Invalid API Key'; return; }
+
+    if (config.find(conf => conf.key === key)) { error = 'API Key alerady registered'; return; }
+    config = [...config, { name, key }];
+    event.target.key.value = '';
+  }
+
+  function removeProject (i) {
+    config.splice(i, 1);
+    config = config;
+  }
 </script>
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family: Arial, Helvetica, sans-serif;
-	}
-	.App {
-		text-align: center;
-	}
-	.App-header {
-		background-color: #F9F6F6;
-		color: #333;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		font-size: calc(10px + 2vmin);
-	}
-	.App-link {
-		color: #ff3e00;
-	}
-	.App-logo {
-		height: 40vmin;
-		pointer-events: none;
-		margin-bottom: 1.0rem;
-		animation: App-logo-spin infinite 1.6s ease-in-out alternate;
-	}
-	@keyframes App-logo-spin {
-		from {
-			transform: scale(1);
-		}
-		to {
-			transform: scale(1.06);
-		}
-	}
+  :global(html) {
+    display: flex;
+  }
+  :global(body) {
+    flex: 1;
+    display: flex;
+
+    color: #333;
+    font-family: nexa,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  .lemwell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .lemwell > header {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  section.config-add {
+    flex: 1;
+    width: 90vw;
+    max-width: 600px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  form {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+  }
+
+  input, button {
+    margin-right: 20px;
+    padding: 8px 12px;
+    border: 1px solid #beccef;
+    border-radius: 8px;
+    background-color: white;
+  }
 </style>
 
-<div class="App">
-	<header class="App-header">
-		<img src="/logo.svg" class="App-logo" alt="logo" />
-		<p>
-			Edit <code>src/App.svelte</code> and save to reload.
-		</p>
-		<a
-			class="App-link"
-			href="https://svelte.dev"
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			{message}
-		</a>
-	</header>
+<div class="lemwell">
+  <header>
+    <h1>lemwell - Track your growth at each new tab</h1>
+  </header>
+  {#if config.length}
+    {#each config as { name, key }, i}
+    <section>
+      <ProfitwellDashboard name={name} key={key} />
+    </section>
+    {/each}
+  {:else}
+    <section class="config-add">
+      <p>Registered your profitwell project.<br> To do so, you need to go to your <a href="https://www2.profitwell.com/app/account/integrations" target="_blank">integrations</a> section then click on API KEYS/DEV KIT. Copy your private token and enter it in the above form.</p>
+      <form on:submit|preventDefault={submitNewApiKey}>
+        <input type="text" name="name" placeholder="">
+        <input type="password" name="key" placeholder="e83ef71c13...">
+        {#if error}<span class="error">{error}</span>{/if}
+        <button type="submit">Save</button>
+      </form>
+    </section>
+  {/if}
 </div>
