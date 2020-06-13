@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
-  "name": "chrome extension that provide a Profitwell dashboard on new page.",
+  "name": "lemwell",
   "version": "1.0.1",
   "chrome_url_overrides" : {
     "newtab": "index.html"
   },
   "permissions": [
-    "'https://api.profitwell.com/v2/metrics/monthly/",
-    "https://api.profitwell.com/v2/metrics/daily/"
+    "https://api.profitwell.com/v2/metrics/monthly/",
+    "https://api.profitwell.com/v2/metrics/daily/",
+    "https://api.profitwell.com/v2/metrics/plans/"
   ]
 }
