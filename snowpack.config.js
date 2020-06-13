@@ -9,10 +9,13 @@ module.exports = {
       plugins: [require('rollup-plugin-svelte')()]
     }
   },
-  "devOptions": {
+  devOptions: {
     bundle: false,
   },
-  "buildOptions": {
+  buildOptions: {
     metaDir: 'meta',
+  },
+  proxy: {
+    '/v2': 'https://api.profitwell.com/v2'
   }
 }
