@@ -11,5 +11,8 @@ module.exports = {
   },
   "devOptions": {
     bundle: false,
+  },
+  "buildOptions": {
+    metaDir: 'meta',
   }
 }

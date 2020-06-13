@@ -1,22 +1,22 @@
 {
   "scripts": {
     "start": "snowpack dev",
-    "build": "snowpack build &&sed -i '' 's/__//g' ./build/dist/index.js && mv build/__snowpack__ build/snowpack",
+    "build": "snowpack build",
     "test": "jest"
   },
   "dependencies": {
     "@sveltejs/pancake": "0.0.13",
     "parcel": "^1.12.4",
     "rollup-plugin-svelte": "^5.2.2",
-    "svelte": "^3.21.0",
+    "svelte": "^3.23.2",
     "svelte-chartjs": "^1.0.4"
   },
   "devDependencies": {
-    "@snowpack/app-scripts-svelte": "^1.1.4",
-    "@snowpack/plugin-parcel": "^1.0.0",
-    "@testing-library/jest-dom": "^5.5.0",
+    "@snowpack/app-scripts-svelte": "^1.2.0",
+    "@snowpack/plugin-parcel": "^1.2.0",
+    "@testing-library/jest-dom": "^5.10.0",
     "@testing-library/svelte": "^3.0.0",
-    "jest": "^25.4.0",
-    "snowpack": "^2.2.0"
+    "jest": "^26.0.1",
+    "snowpack": "^2.5.1"
   }
 }
