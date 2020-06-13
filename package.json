@@ -16,6 +16,7 @@
     "@snowpack/plugin-parcel": "^1.2.0",
     "@testing-library/jest-dom": "^5.10.0",
     "@testing-library/svelte": "^3.0.0",
+    "eslint-plugin-svelte3": "^2.7.3",
     "jest": "^26.0.1",
     "snowpack": "^2.5.1"
   }

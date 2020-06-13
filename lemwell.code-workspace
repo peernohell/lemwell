@@ -5,8 +5,14 @@
     }
   ],
   "settings": {
+    "editor.tabSize": 2,
     "cSpell.words": [
-      "Quadtree"
+      "Profitwell",
+      "Quadtree",
+      "chartjs",
+      "lemwell",
+      "sveletejs",
+      "sveltejs"
     ]
-  }
+  },
 }
