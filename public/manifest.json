@@ -6,6 +6,7 @@
     "newtab": "index.html"
   },
   "permissions": [
-    "https://api.profitwell.com/*"
+    "'https://api.profitwell.com/v2/metrics/monthly/",
+    "https://api.profitwell.com/v2/metrics/daily/"
   ]
 }
