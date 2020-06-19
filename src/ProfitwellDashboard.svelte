@@ -107,6 +107,11 @@
 
 
 <style>
+
+  h2 {
+    text-align: center;
+  }
+
   .result {
     max-width: 1440px;
     margin: 0 auto;
