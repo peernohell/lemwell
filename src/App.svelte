@@ -30,9 +30,6 @@ config = [...config, { company, key }];
 </script>
 
 <div class="lemwell">
-  <header>
-    <h1>lemwell - Track your growth at each new tab</h1>
-  </header>
   {#if config.length}
     {#each config as { company, key }, i}
     <section>
@@ -40,6 +37,9 @@ config = [...config, { company, key }];
     </section>
     {/each}
   {:else}
+    <header>
+      <h1>lemwell - Track your growth at each new tab</h1>
+    </header>
     <section class="config-add">
       <p>Registered your profitwell project.<br> To do so, you need to go to your <a href="https://www2.profitwell.com/app/account/integrations" target="_blank">integrations</a> section then click on API KEYS/DEV KIT. Copy your private token and enter it in the above form.</p>
       <form on:submit|preventDefault={submitNewApiKey}>
