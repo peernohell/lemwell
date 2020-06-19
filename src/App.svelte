@@ -11,16 +11,15 @@
   }
 
   async function submitNewApiKey (event) {
-    const name = event.target.name.value;
     const key = event.target.key.value;
-
-    if (!name) return;
     if (!key) return;
 
     if (!(await profitwell.test(key))) { error = 'Invalid API Key'; return; }
 
-    if (config.find(conf => conf.key === key)) { error = 'API Key alerady registered'; return; }
-    config = [...config, { name, key }];
+    if (config.find(conf => conf.key === key)) { error = 'API Key already registered'; return; }
+    const company = await profitwell.company(key);
+
+config = [...config, { company, key }];
     event.target.key.value = '';
   }
 
@@ -83,16 +82,15 @@
     <h1>lemwell - Track your growth at each new tab</h1>
   </header>
   {#if config.length}
-    {#each config as { name, key }, i}
+    {#each config as { company, key }, i}
     <section>
-      <ProfitwellDashboard name={name} key={key} />
+      <ProfitwellDashboard company={company} key={key} />
     </section>
     {/each}
   {:else}
     <section class="config-add">
       <p>Registered your profitwell project.<br> To do so, you need to go to your <a href="https://www2.profitwell.com/app/account/integrations" target="_blank">integrations</a> section then click on API KEYS/DEV KIT. Copy your private token and enter it in the above form.</p>
       <form on:submit|preventDefault={submitNewApiKey}>
-        <input type="text" name="name" placeholder="">
         <input type="password" name="key" placeholder="e83ef71c13...">
         {#if error}<span class="error">{error}</span>{/if}
         <button type="submit">Save</button>

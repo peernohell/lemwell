@@ -12,11 +12,11 @@
   Chart.defaults.global.legend.display = false;
   Chart.defaults.global.tooltips
 
-  export let name;
+  export let company;
   export let key;
 
   // override option depending of the name of the graph
-  function graphOptions(graph) {
+  const graphOptions = graph => {
     graph.convert = a => a;
 
     if (graph.graphData.datasets[0].data.find(v => (v !== (v | 0)))) graph.convert = toEuro;
@@ -24,7 +24,9 @@
     return graph;
   };
 
-  let promise = profitwell.api(key, '/v2/metrics/monthly/?plan_id=&metrics=').then(result => result.json()).then(r => {
+  const currencyToSymbol = currency => ({ eur: '€', usd: '$'}[currency] || currency);
+
+  let promise = profitwell.api(key, '/v2/metrics/monthly/?plan_id=&metrics=recurring_revenue').then(result => result.json()).then(r => {
     const result = Object.entries(r.data).map(([name, data]) => ({
       name: name.replace(/_/g, ' '),
       options: {
@@ -68,7 +70,7 @@
   let closest;
 
   function toEuro (num) {
-    return num >= 10000 ? `${num / 1000 | 0}K€` : `${num}€`;
+    return num >= 10000 ? `${num / 1000 | 0}K ${currencyToSymbol(company.currency)}` : `${num} ${currencyToSymbol(company.currency)}`;
   }
 
   const months = 'Jan Feb Mar Apr May June July Aug Sept Oct Nov Dec'.split(' ');
@@ -84,7 +86,7 @@
 </script>
 
 <div>
-  <h2>{name}</h2>
+  <h2>{company.name}</h2>
   {#await promise}
     <p>...waiting</p>
   {:then result}
@@ -104,7 +106,7 @@
 </div>
 
 
-<style>
+<style type="text/css">
   .result {
     max-width: 1440px;
     margin: 0 auto;

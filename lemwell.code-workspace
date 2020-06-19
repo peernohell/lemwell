@@ -11,8 +11,10 @@
       "Quadtree",
       "chartjs",
       "lemwell",
+      "newtab",
       "sveletejs",
       "sveltejs"
-    ]
+    ],
+    "svelte.plugin.typescript.enable": false
   },
 }
