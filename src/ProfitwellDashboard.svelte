@@ -10,7 +10,6 @@
   Chart.defaults.scale.gridLines.display = false;
   Chart.defaults.scale.ticks.display = false;
   Chart.defaults.global.legend.display = false;
-  Chart.defaults.global.tooltips
 
   export let company;
   export let key;
@@ -46,6 +45,14 @@
             },
           }],
         },
+        tooltips: {
+          callbacks: {
+            label(tooltipItem) {
+              console.log(tooltipItem);
+              return toEuro(tooltipItem.yLabel);
+            },
+          },
+        },
       },
       graphData: {
         labels: data.map(point => point.date),
@@ -70,7 +77,7 @@
   let closest;
 
   function toEuro (num) {
-    return num >= 10000 ? `${num / 1000 | 0}K ${currencyToSymbol(company.currency)}` : `${num} ${currencyToSymbol(company.currency)}`;
+    return num >= 10000 ? `${num / 1000 | 0}K ${currencyToSymbol(company.currency)}` : `${Math.round((num + Number.EPSILON) * 100) / 100} ${currencyToSymbol(company.currency)}`;
   }
 
   const months = 'Jan Feb Mar Apr May June July Aug Sept Oct Nov Dec'.split(' ');
