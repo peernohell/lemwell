@@ -15,6 +15,8 @@
       "sveletejs",
       "sveltejs"
     ],
-    "svelte.plugin.typescript.enable": false
+    "svelte.plugin.typescript.enable": false,
+    "eslint.alwaysShowStatus": true,
+    "eslint.format.enable": true
   },
 }
