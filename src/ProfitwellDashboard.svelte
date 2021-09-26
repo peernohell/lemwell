@@ -3,7 +3,8 @@
   // import * as pkg from 'https://unpkg.com/@sveltejs/pancake@0.0.9?module';
   // import * as Pancake from '@sveletejs/pancake';
 
-  import Line from "./svelte-chartjs/Line.svelte";
+  import Line from './svelte-chartjs/Line.svelte';
+  import Bar from './svelte-chartjs/Bar.svelte';
   import profitwell from './profitwell';
 
   // default chartjs options
@@ -14,20 +15,29 @@
   export let company;
   export let key;
 
-  // override option depending of the name of the graph
-  const graphOptions = graph => {
-    graph.convert = a => a;
+  // https://stackoverflow.com/a/6117889/958898
+  export function getWeekNumber(d) {
+    // Copy date so don't modify original
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    // Get first day of year
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    // Calculate full weeks to nearest Thursday
+    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+    // Return array of year and week number
+    return [d.getUTCFullYear(), weekNo];
+  }
 
-    if (graph.graphData.datasets[0].data.find(v => (v !== (v | 0)))) graph.convert = toEuro;
+  const responseToGrapData = (growth, [name, dataPoint]) => {
+    const values = dataPoint.map(point => point.value);
+    const convert = values.find(value => (value !== (value | 0))) ? toEuro : (value => value);
 
-    return graph;
-  };
-
-  const currencyToSymbol = currency => ({ eur: '€', usd: '$'}[currency] || currency);
-
-  let promise = profitwell.api(key, '/v2/metrics/monthly/?plan_id=&metrics=recurring_revenue').then(result => result.json()).then(r => {
-    const result = Object.entries(r.data).map(([name, data]) => ({
+    return {
       name: name.replace(/_/g, ' '),
+      value: convert(growth ? values.reduce((a, b) => a + b) : values[values.length - 1]),
+      type: growth ? 'bar' : 'line',
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -55,7 +65,7 @@
         },
       },
       graphData: {
-        labels: data.map(point => point.date),
+        labels: dataPoint.map(point => point.date),
         datasets: [
           {
             label: false,
@@ -66,13 +76,63 @@
             borderDashOffset: 0.0,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: data.map(point => point.value),
+            data: values,
           },
         ]
       },
-    })).map(graphOptions);
-    return result;
-  });
+    };
+  };
+
+  const currencyToSymbol = currency => ({ eur: '€', usd: '$'}[currency] || currency);
+
+  const monthlyRecuringRevenue = async () => {
+    const response = await profitwell.api(key, '/v2/metrics/monthly/?plan_id=&metrics=recurring_revenue');
+    const data = await response.json();
+
+    return Object.entries(data.data).map(responseToGrapData.bind(null, false));
+  }
+
+  const lastAndCurrentWeekRevenue = async (growth = true) => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const previousYear = currentYear + (currentMonth ? 0 : -1);
+    const previousMonth = currentMonth + (currentMonth ? -1 : 11);
+
+    const previousMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${previousYear}-0${previousMonth + 1}&plan_id=&metrics=recurring_revenue`);
+    const currentMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${currentYear}-0${currentMonth + 1}&plan_id=&metrics=recurring_revenue`);
+    const previousMonthRecurringRevenue = (await previousMonthData.json()).data.recurring_revenue;
+    const currentMonthRecurringRevenue = (await currentMonthData.json()).data.recurring_revenue;
+
+    console.log('lastAndCurrentWeekRevenue', previousMonthRecurringRevenue, currentMonthRecurringRevenue);
+    const recurringRevenue = previousMonthRecurringRevenue.concat(currentMonthRecurringRevenue);
+    console.log('lastAndCurrentWeekRevenue', recurringRevenue);
+
+    const [,currentWeek] = getWeekNumber(today);
+    const [,startWeek] = getWeekNumber(new Date(recurringRevenue[0].date));
+    let previousValue = recurringRevenue[0].value
+
+    const newData = recurringRevenue.reduce((data, { date, value }) => {
+      const [year, week] = getWeekNumber(new Date(date));
+      const growthValue = value - previousValue;
+      previousValue = value;
+
+      if (week === startWeek || week > currentWeek) return data;
+
+      if (!data[`recurring_revenue_${year}-${week}`]) data[`recurring_revenue_${year}-${week}`] = [];
+      data[`recurring_revenue_${year}-${week}`].push({ date, value: growth ? growthValue : value });
+
+      return data;
+    }, {});
+
+    Object.keys(newData).slice(0, -3).forEach(key => { delete newData[key]; });
+
+    return Object.entries(newData).map(responseToGrapData.bind(null, growth));
+  }
+
+  // let promise = monthlyRecuringRevenue();
+  // let promise = lastAndCurrentWeekRevenue();
+  let promise = Promise.all([lastAndCurrentWeekRevenue(), monthlyRecuringRevenue()]).then(([a, b]) => a.concat(b));
 
   let closest;
 
@@ -100,9 +160,13 @@
     <div class="result">
       {#each result as graph}
         <div class="data">
-          <div class="header"><div class="title">{graph.name}</div><div class="value">{graph.convert(graph.graphData.datasets[0].data[graph.graphData.datasets[0].data.length - 1])}</div></div>
+          <div class="header"><div class="title">{graph.name}</div><div class="value">{graph.value}</div></div>
           <div class="chart">
-            <Line data={graph.graphData} width={100} height={50} options={graph.options} />
+            {#if graph.type === 'bar'}
+              <Bar data={graph.graphData} width={100} height={50} options={graph.options} />
+            {:else}
+              <Line data={graph.graphData} width={100} height={50} options={graph.options} />
+            {/if}
           </div>
         </div>
       {/each}
