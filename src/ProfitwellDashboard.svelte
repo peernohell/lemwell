@@ -99,8 +99,8 @@
     const previousYear = currentYear + (currentMonth ? 0 : -1);
     const previousMonth = currentMonth + (currentMonth ? -1 : 11);
 
-    const previousMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${previousYear}-0${previousMonth + 1}&plan_id=&metrics=recurring_revenue`);
-    const currentMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${currentYear}-0${currentMonth + 1}&plan_id=&metrics=recurring_revenue`);
+    const previousMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${previousYear}-${`0${previousMonth + 1}`.slice(-2)}&plan_id=&metrics=recurring_revenue`);
+    const currentMonthData = await profitwell.api(key, `/v2/metrics/daily/?month=${currentYear}-${`0${currentMonth + 1}`.slice(-2)}&plan_id=&metrics=recurring_revenue`);
     const previousMonthRecurringRevenue = (await previousMonthData.json()).data.recurring_revenue;
     const currentMonthRecurringRevenue = (await currentMonthData.json()).data.recurring_revenue;
 
